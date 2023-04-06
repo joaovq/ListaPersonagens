@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
-import com.bumptech.glide.Glide
 import com.example.listapersonagens.ListaDePersonagensApplication
 import com.example.listapersonagens.R
 import com.example.listapersonagens.databinding.FragmentCharactersBinding
@@ -27,7 +26,28 @@ class CharactersFragment : Fragment() {
     private val binding get() = _binding
 
     private val charactersAdapter = CharactersAdapter()
+
+    /* DEPOIS
+    * SRP =>
+    *  Utilizamos esses conceitos para que o fragment neste caso, tenha somente responsabilidades da
+    * view e o appContainer que disponiblize as dependências que ele precisa.
+    *   Desta forma também reduzimos o código boilerplate e utilizamos só que realmente é necessário
+    * */
     private val appContainer = (activity?.application as ListaDePersonagensApplication).appContainer
+
+    /** ANTES
+     *
+     * private val retrofitDisney: Retrofit = RetrofitConfig
+     .getInstance(UrlFactory.BASE_URL_DISNEY)
+     val disneyService: DisneyService = retrofitDisney.create(DisneyService::class.java)
+
+     private val retrofitRickyAndMorty: Retrofit = RetrofitConfig
+     .getInstance(UrlFactory.BASE_URL_RM)
+     val rickyAndMortyService: RickyAndMortyService =
+     retrofitRickyAndMorty.create(RickyAndMortyService::class.java)
+     *
+     *
+     * */
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,10 +76,11 @@ class CharactersFragment : Fragment() {
                                 requireContext(),
                                 DISNEY.colorRes,
                             )
-                            Glide.with(binding.root)
-                                .load(DISNEY.imageUrl)
-                                .error(R.drawable.ic_launcher_background)
-                                .into(ivCharactersTypeImage)
+                            ivCharactersTypeImage.loadImage(
+                                requireView(),
+                                DISNEY.imageUrl,
+                                R.drawable.ic_launcher_background,
+                            )
 
                             val disneyCharacters = appContainer.disneyService.getCharacters()
                             charactersAdapter.submitList(disneyCharacters.data.toDomain())
@@ -77,7 +98,7 @@ class CharactersFragment : Fragment() {
                             ivCharactersTypeImage.loadImage(
                                 requireView(),
                                 RICKY_AND_MORTY.imageUrl,
-                                R.drawable.ic_launcher_background
+                                R.drawable.ic_launcher_background,
                             )
                             val rickyAndMortyCharacters =
                                 appContainer.rickyAndMortyService.getCharacters()
