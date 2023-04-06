@@ -4,7 +4,7 @@ data class RickyAndMortyCharacters(
     val results: List<RickyAndMortyCharacter>
 )
 
-data class RickyAndMortyCharacter (
+data class RickyAndMortyCharacter(
     val name: String,
     val image: String
 )

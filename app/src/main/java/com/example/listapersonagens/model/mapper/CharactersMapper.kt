@@ -1,15 +1,15 @@
 package com.example.listapersonagens.model.mapper
 
-import com.example.listapersonagens.model.domain.Character
 import com.example.listapersonagens.model.api.DisneyCharacter
 import com.example.listapersonagens.model.api.RickyAndMortyCharacter
+import com.example.listapersonagens.model.domain.Character
 
 @JvmName("toDisneyDomain")
 fun List<DisneyCharacter>.toDomain(): List<Character> {
     return this.map {
         Character(
             name = it.name,
-            imageUrl = it.imageUrl
+            imageUrl = it.imageUrl,
         )
     }
 }
@@ -19,7 +19,7 @@ fun List<RickyAndMortyCharacter>.toDomain(): List<Character> {
     return this.map {
         Character(
             name = it.name,
-            imageUrl = it.image
+            imageUrl = it.image,
         )
     }
 }
