@@ -15,11 +15,11 @@ fun List<DisneyCharacter>.toDomain(): List<Character> {
 }
 
 @JvmName("toRickyAndMortyDomain")
-fun List<RickyAndMortyCharacter>.toDomain(): List<Character> {
-    return this.map {
+fun List<RickyAndMortyCharacter>?.toDomain(): List<Character> {
+    return this?.map {
         Character(
             name = it.name,
             imageUrl = it.image,
         )
-    }
+    } ?: emptyList()
 }

@@ -11,11 +11,13 @@ import com.example.listapersonagens.databinding.FragmentLoginBinding
 import com.example.listapersonagens.di.usecase.SignInUseCase
 import com.example.listapersonagens.network.authentication.FirebaseAuthenticator
 import com.example.listapersonagens.ui.utils.extension.toast
+import org.koin.android.ext.android.inject
 
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
+    private val useCase: SignInUseCase by inject()
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -48,7 +50,6 @@ class LoginFragment : Fragment() {
                  )
                  * */
 
-                val useCase: SignInUseCase = SignInUseCase(FirebaseAuthenticator)
                 val isLoggedIn = useCase(
                     tietEmail.text.toString(),
                     tietPassword.text.toString(),

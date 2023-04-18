@@ -6,12 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
-import com.example.listapersonagens.ListaDePersonagensApplication
 import com.example.listapersonagens.R
 import com.example.listapersonagens.databinding.FragmentCharactersBinding
 import com.example.listapersonagens.model.domain.CharacterType.DISNEY
 import com.example.listapersonagens.model.domain.CharacterType.RICKY_AND_MORTY
 import com.example.listapersonagens.model.mapper.toDomain
+import com.example.listapersonagens.network.service.DisneyService
+import com.example.listapersonagens.network.service.RickyAndMortyService
 import com.example.listapersonagens.ui.utils.adapter.CharactersAdapter
 import com.example.listapersonagens.ui.utils.extension.gone
 import com.example.listapersonagens.ui.utils.extension.loadImage
@@ -19,6 +20,7 @@ import com.example.listapersonagens.ui.utils.extension.visible
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class CharactersFragment : Fragment() {
 
@@ -26,6 +28,8 @@ class CharactersFragment : Fragment() {
     private val binding get() = _binding
 
     private val charactersAdapter = CharactersAdapter()
+    private val rickyAndMortyService: RickyAndMortyService by inject()
+    private val disneyService: DisneyService by inject()
 
     /* DEPOIS
     * SRP =>
@@ -33,7 +37,6 @@ class CharactersFragment : Fragment() {
     * view e o appContainer que disponiblize as dependências que ele precisa.
     *   Desta forma também reduzimos o código boilerplate e utilizamos só que realmente é necessário
     * */
-    private val appContainer = (activity?.application as ListaDePersonagensApplication).appContainer
 
     /** ANTES
      *
@@ -82,7 +85,7 @@ class CharactersFragment : Fragment() {
                                 R.drawable.ic_launcher_background,
                             )
 
-                            val disneyCharacters = appContainer.disneyService.getCharacters()
+                            val disneyCharacters = disneyService.getCharacters()
                             charactersAdapter.submitList(disneyCharacters.data.toDomain())
                             pbLoadingCharacters.gone()
                         }
@@ -101,10 +104,11 @@ class CharactersFragment : Fragment() {
                                 R.drawable.ic_launcher_background,
                             )
                             val rickyAndMortyCharacters =
-                                appContainer.rickyAndMortyService.getCharacters()
+                                rickyAndMortyService.getCharacters()
                             charactersAdapter.submitList(
                                 rickyAndMortyCharacters.results.toDomain(),
                             )
+
                             pbLoadingCharacters.gone()
                         }
                     }
