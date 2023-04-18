@@ -16,6 +16,8 @@
             app:destination="@id/charactersFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:popExitAnim="@anim/nav_default_exit_anim"
+            app:popUpTo="@id/charactersFragment"
+            app:restoreState="false"
             app:popUpToInclusive="true" />
 
     </fragment>
