@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.example.listapersonagens.R
 import com.example.listapersonagens.databinding.FragmentLoginBinding
@@ -66,7 +67,9 @@ class LoginFragment : Fragment() {
             viewModel.isAuth.collectLatest { isLoggedIn ->
                 isLoggedIn?.let {
                     if (it) {
-                        findNavController().navigate(R.id.action_loginFragment_to_charactersFragment)
+                        findNavController().navigate(
+                            LoginFragmentDirections.actionLoginFragmentToCharactersFragment(),
+                        )
                     } else {
                         toast(message = "Usuário não encontrado.")
                     }
