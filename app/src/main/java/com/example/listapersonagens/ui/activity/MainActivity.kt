@@ -3,6 +3,7 @@ package com.example.listapersonagens.ui.activity
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.listapersonagens.databinding.ActivityMainBinding
+import com.example.listapersonagens.designpatterns.creationals.RetrofitConfig
 
 class MainActivity : AppCompatActivity() {
 
