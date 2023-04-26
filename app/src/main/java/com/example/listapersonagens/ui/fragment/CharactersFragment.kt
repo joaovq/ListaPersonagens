@@ -8,49 +8,28 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import com.example.listapersonagens.R
 import com.example.listapersonagens.databinding.FragmentCharactersBinding
+import com.example.listapersonagens.model.domain.Character
+import com.example.listapersonagens.model.domain.CharacterType
 import com.example.listapersonagens.model.domain.CharacterType.DISNEY
 import com.example.listapersonagens.model.domain.CharacterType.RICKY_AND_MORTY
-import com.example.listapersonagens.model.mapper.toDomain
 import com.example.listapersonagens.network.service.DisneyService
 import com.example.listapersonagens.network.service.RickyAndMortyService
+import com.example.listapersonagens.ui.presenter.CharactersPresenter
+import com.example.listapersonagens.ui.presenter.CharactersView
 import com.example.listapersonagens.ui.utils.adapter.CharactersAdapter
 import com.example.listapersonagens.ui.utils.extension.gone
 import com.example.listapersonagens.ui.utils.extension.loadImage
 import com.example.listapersonagens.ui.utils.extension.visible
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.inject
 
-class CharactersFragment : Fragment() {
+class CharactersFragment : Fragment(), CharactersView {
 
     private lateinit var _binding: FragmentCharactersBinding
     private val binding get() = _binding
 
     private val charactersAdapter = CharactersAdapter()
-    private val rickyAndMortyService: RickyAndMortyService by inject()
-    private val disneyService: DisneyService by inject()
-
-    /* DEPOIS
-    * SRP =>
-    *  Utilizamos esses conceitos para que o fragment neste caso, tenha somente responsabilidades da
-    * view e o appContainer que disponiblize as dependências que ele precisa.
-    *   Desta forma também reduzimos o código boilerplate e utilizamos só que realmente é necessário
-    * */
-
-    /** ANTES
-     *
-     * private val retrofitDisney: Retrofit = RetrofitConfig
-     .getInstance(UrlFactory.BASE_URL_DISNEY)
-     val disneyService: DisneyService = retrofitDisney.create(DisneyService::class.java)
-
-     private val retrofitRickyAndMorty: Retrofit = RetrofitConfig
-     .getInstance(UrlFactory.BASE_URL_RM)
-     val rickyAndMortyService: RickyAndMortyService =
-     retrofitRickyAndMorty.create(RickyAndMortyService::class.java)
-     *
-     *
-     * */
+    private val presenter: CharactersPresenter by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,57 +42,70 @@ class CharactersFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupView()
+        presenter.attachView(this)
+        onChecked()
     }
 
-    private fun setupView() {
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.dettachView()
+    }
+
+    override fun onLoading() {
+        binding.pbLoadingCharacters.visible()
+    }
+
+    override fun onSuccess(characters: List<Character>) {
         with(binding) {
             rvCharacters.adapter = charactersAdapter
+            charactersAdapter.submitList(characters)
+        }
+    }
+
+    private fun onChecked() {
+        with(binding) {
             rgCharacterType.setOnCheckedChangeListener { _, checkedId ->
                 when (checkedId) {
                     R.id.rbCharacterTypeDisney -> {
-                        CoroutineScope(Dispatchers.IO).launch(Dispatchers.Main) {
-                            pbLoadingCharacters.visible()
-                            tvCharactersTypeTitle.text = DISNEY.title
-                            llCharactersTypeHeader.background = AppCompatResources.getDrawable(
-                                requireContext(),
-                                DISNEY.colorRes,
-                            )
-                            ivCharactersTypeImage.loadImage(
-                                requireView(),
-                                DISNEY.imageUrl,
-                                R.drawable.ic_launcher_background,
-                            )
-
-                            val disneyCharacters = disneyService.getCharacters()
-                            charactersAdapter.submitList(disneyCharacters.data.toDomain())
-                            pbLoadingCharacters.gone()
+                        with(DISNEY) {
+                            setUpCharactersView(this)
+                            presenter.getCharacters(DISNEY)
                         }
                     }
-                    R.id.rbCharacterTypeRickyAndMorty -> {
-                        CoroutineScope(Dispatchers.IO).launch(Dispatchers.Main) {
-                            pbLoadingCharacters.visible()
-                            tvCharactersTypeTitle.text = RICKY_AND_MORTY.title
-                            llCharactersTypeHeader.background = AppCompatResources.getDrawable(
-                                requireContext(),
-                                RICKY_AND_MORTY.colorRes,
-                            )
-                            ivCharactersTypeImage.loadImage(
-                                requireView(),
-                                RICKY_AND_MORTY.imageUrl,
-                                R.drawable.ic_launcher_background,
-                            )
-                            val rickyAndMortyCharacters =
-                                rickyAndMortyService.getCharacters()
-                            charactersAdapter.submitList(
-                                rickyAndMortyCharacters.results.toDomain(),
-                            )
 
-                            pbLoadingCharacters.gone()
+                    R.id.rbCharacterTypeRickyAndMorty -> {
+                        with(RICKY_AND_MORTY) {
+                            setUpCharactersView(this)
+                            presenter.getCharacters(RICKY_AND_MORTY)
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun setUpCharactersView(
+        characterType: CharacterType
+    ) {
+        binding.tvCharactersTypeTitle.text = characterType.title
+        binding.llCharactersTypeHeader.background =
+            AppCompatResources.getDrawable(
+                requireContext(),
+                characterType.colorRes,
+            )
+        binding.ivCharactersTypeImage.loadImage(
+            requireView(),
+            characterType.imageUrl,
+            R.drawable.ic_launcher_background,
+        )
+    }
+
+    override fun onFailure(exception: Exception, message: String) {
+        Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show()
+        exception.printStackTrace()
+    }
+
+    override fun onHideLoading() {
+        binding.pbLoadingCharacters.gone()
     }
 }
